@@ -1,0 +1,77 @@
+---
+import LanguageSwitcher from './LanguageSwitcher.astro';
+import { profile } from '../data/cv';
+import { localeUrl, type Dictionary, type Locale } from '../i18n';
+
+interface Props {
+  locale: Locale;
+  t: Dictionary;
+}
+const { locale, t } = Astro.props;
+const home = localeUrl(locale);
+
+const links = [
+  { id: 'portfolio', label: t.sections.portfolio },
+  { id: 'education', label: t.sections.education },
+  { id: 'languages', label: t.sections.languages },
+];
+---
+
+<header class="site-header no-print">
+  <div class="container site-header__inner">
+    <a class="site-header__name" href={home}>{profile.name}</a>
+
+    <nav class="site-nav" aria-label={t.nav.label}>
+      {links.map((link) => <a href={`${home}#${link.id}`}>{link.label}</a>)}
+      <LanguageSwitcher locale={locale} t={t} />
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    backdrop-filter: saturate(180%) blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 4rem;
+    gap: var(--space-6);
+  }
+  .site-header__name {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .site-header__name:hover {
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .site-nav {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.75rem, 2.5vw, 1.75rem);
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+  .site-nav > a {
+    color: var(--ink-soft);
+  }
+  .site-nav > a:hover {
+    color: var(--brand-700);
+    text-decoration: none;
+  }
+
+  /* Hide section anchors on small screens; keep name + language switcher. */
+  @media (max-width: 42rem) {
+    .site-nav > a {
+      display: none;
+    }
+  }
+</style>

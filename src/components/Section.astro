@@ -1,0 +1,59 @@
+---
+// A CV section: label column on the left, content on the right (wide screens).
+interface Props {
+  id: string;
+  title: string;
+}
+const { id, title } = Astro.props;
+---
+
+<section id={id} class="cv-section" aria-labelledby={`${id}-title`}>
+  <h2 id={`${id}-title`} class="cv-section__title">{title}</h2>
+  <div class="cv-section__body">
+    <slot />
+  </div>
+</section>
+
+<style>
+  .cv-section {
+    display: grid;
+    gap: var(--space-6);
+    padding-block: var(--space-12);
+    border-top: 1px solid var(--line);
+  }
+  .cv-section__title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--brand-600);
+  }
+  .cv-section__body {
+    min-width: 0;
+  }
+
+  @media (min-width: 52rem) {
+    .cv-section {
+      grid-template-columns: 10rem 1fr;
+      gap: var(--space-8);
+    }
+    .cv-section__title {
+      position: sticky;
+      top: 6rem;
+      align-self: start;
+      padding-top: 0.2rem;
+    }
+  }
+
+  @media print {
+    /* Block flow so a section can continue onto the next page. */
+    .cv-section {
+      display: block;
+      padding-block: var(--space-3);
+    }
+    .cv-section__title {
+      position: static;
+      margin-bottom: var(--space-3);
+    }
+  }
+</style>

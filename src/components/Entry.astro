@@ -1,0 +1,90 @@
+---
+// One dated row of the CV (a job, a school).
+// The heading comes first in the DOM so screen readers hear the role before the
+// dates; the grid puts the dates in the left column visually.
+import Period from './Period.astro';
+import { tr, type Dictionary, type Locale } from '../i18n';
+import type { CvEntry } from '../data/cv';
+
+interface Props {
+  entry: CvEntry;
+  locale: Locale;
+  t: Dictionary;
+}
+const { entry, locale, t } = Astro.props;
+const org = tr(entry.org, locale);
+---
+
+<li class="cv-row entry">
+  <div class="cv-row__main">
+    <h3 class="entry__title">{tr(entry.title, locale)}</h3>
+    <p class="entry__org">
+      {entry.url ? <a href={entry.url} rel="noopener noreferrer">{org}</a> : org}
+      {entry.location && <span class="entry__location"> · {tr(entry.location, locale)}</span>}
+    </p>
+    {
+      entry.points && (
+        <ul class="entry__points">
+          {entry.points.map((point) => (
+            <li>{tr(point, locale)}</li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+  <p class="cv-row__aside entry__when">
+    <Period start={entry.start} end={entry.end} t={t} />
+  </p>
+</li>
+
+<style>
+  .entry__when {
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+  }
+  .entry__title {
+    font-size: 1.08rem;
+    letter-spacing: -0.01em;
+  }
+  .entry__org {
+    color: var(--ink-soft);
+    margin-top: 0.1rem;
+  }
+  .entry__org a {
+    font-weight: 500;
+  }
+  .entry__points {
+    margin-top: var(--space-3);
+    padding-left: 1.1rem;
+    color: var(--ink-soft);
+    display: grid;
+    gap: var(--space-1);
+  }
+  .entry__points li::marker {
+    color: var(--muted);
+  }
+
+  @media (min-width: 36rem) {
+    .entry__when {
+      /* Align with the heading's first line. */
+      padding-top: 0.15rem;
+    }
+  }
+
+  @media print {
+    /* Long entries may break between bullets, never inside one, and the
+       heading stays with what follows it. */
+    .entry__title,
+    .entry__org {
+      break-after: avoid;
+    }
+    .entry__points li {
+      break-inside: avoid;
+    }
+    .entry__points {
+      margin-top: var(--space-1);
+      gap: 0;
+    }
+  }
+</style>

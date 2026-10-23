@@ -1,0 +1,83 @@
+---
+// Client projects, most recent first. Dates are kept in the data for ordering
+// but deliberately not shown.
+import { projects } from '../data/cv';
+import type { Locale } from '../i18n';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+---
+
+<ol class="entries">
+  {
+    projects.map((project) => (
+      <li class="cv-row project">
+        <h3 class="cv-row__aside project__client">{project.client}</h3>
+        <div class="cv-row__main">
+          <p class="project__desc">{project.description[locale]}</p>
+          {project.role && <p class="project__role">{project.role[locale]}</p>}
+          {project.points && !project.hidePoints && (
+            <ul class="project__points">
+              {project.points.map((point) => (
+                <li>{point[locale]}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  .project__client {
+    font-size: 1rem;
+    letter-spacing: -0.01em;
+  }
+  .project__desc {
+    color: var(--ink);
+  }
+  .project__role {
+    margin-top: 0.1rem;
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+  }
+  .project__points {
+    margin-top: var(--space-2);
+    padding-left: 1.1rem;
+    color: var(--ink-soft);
+    display: grid;
+    gap: var(--space-1);
+  }
+  .project__points li::marker {
+    color: var(--muted);
+  }
+
+  @media (min-width: 36rem) {
+    .project__client {
+      /* Optical alignment with the description's first line. */
+      padding-top: 0.05rem;
+    }
+  }
+
+  @media print {
+    /* Short projects stay whole; a long one (with points) may break between
+       bullets, never inside one. */
+    .project:not(:has(.project__points)) {
+      break-inside: avoid;
+    }
+    .project__client,
+    .project__desc,
+    .project__role {
+      break-after: avoid;
+    }
+    .project__points li {
+      break-inside: avoid;
+    }
+    .project__points {
+      gap: 0;
+    }
+  }
+</style>

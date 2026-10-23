@@ -1,0 +1,21 @@
+---
+// A date range: "Jul 2022 – present", "2015 – 2017", or a single date.
+import { formatYearMonth, type Dictionary } from '../i18n';
+
+interface Props {
+  start: string;
+  /** null = ongoing; omitted (or equal to start) = single date. */
+  end?: string | null;
+  t: Dictionary;
+}
+const { start, end, t } = Astro.props;
+const format = (value: string) => formatYearMonth(value, t.dateLocale);
+---
+
+<time datetime={start}>{format(start)}</time>{
+  end === null ? (
+    <> – {t.present}</>
+  ) : end && end !== start ? (
+    <> – <time datetime={end}>{format(end)}</time></>
+  ) : null
+}

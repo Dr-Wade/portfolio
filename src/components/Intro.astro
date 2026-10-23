@@ -1,0 +1,202 @@
+---
+import { Image } from 'astro:assets';
+import Icon from './Icon.astro';
+import { profile } from '../data/cv';
+import { tr, type Dictionary, type Locale } from '../i18n';
+
+interface Props {
+  locale: Locale;
+  t: Dictionary;
+}
+const { locale, t } = Astro.props;
+
+// Drop a file named photo.(jpg|jpeg|png|webp|avif) into src/assets/ and it shows
+// here, resized and compressed at build time. Until then, initials stand in.
+const photos = import.meta.glob<{ default: ImageMetadata }>(
+  '../assets/photo.{jpg,jpeg,png,webp,avif}',
+  { eager: true },
+);
+const photo = Object.values(photos)[0]?.default;
+const initials = profile.name
+  .split(' ')
+  .map((part) => part[0])
+  .join('');
+---
+
+<section class="intro" aria-labelledby="intro-name">
+  <div class="intro__photo">
+    {
+      photo ? (
+        <Image src={photo} alt={t.intro.photoAlt} width={320} loading="eager" />
+      ) : (
+        <span class="intro__initials" aria-hidden="true">
+          {initials}
+        </span>
+      )
+    }
+  </div>
+
+  <div class="intro__main">
+    <h1 id="intro-name" class="intro__name">{profile.name}</h1>
+    <p class="intro__role">
+      {tr(profile.role, locale)}{' '}
+      <span class="intro__at">{t.intro.at}</span>{' '}
+      <a href={profile.company.url} rel="noopener noreferrer">{profile.company.name}</a>
+    </p>
+  </div>
+
+  <div class="intro__aside">
+    <ul class="intro__facts" role="list">
+      <li>
+        <Icon name="pin" size={17} />
+        <span class="visually-hidden">{t.intro.locationLabel}:</span>
+        {profile.location}
+      </li>
+      <li>
+        <Icon name="mail" size={17} />
+        <span class="visually-hidden">{t.intro.emailLabel}:</span>
+        <a href={`mailto:${profile.email}`}>{profile.email}</a>
+      </li>
+      <li>
+        <Icon name="github" size={17} />
+        <span class="visually-hidden">{t.intro.githubLabel}:</span>
+        <a href={`https://github.com/${profile.github}`} rel="noopener noreferrer">
+          github.com/{profile.github}
+        </a>
+      </li>
+      {
+        profile.linkedin && (
+          <li>
+            <Icon name="linkedin" size={17} />
+            <span class="visually-hidden">{t.intro.linkedinLabel}:</span>
+            <a href={`https://www.linkedin.com/in/${profile.linkedin}/`} rel="noopener noreferrer">
+              linkedin.com/in/{profile.linkedin}
+            </a>
+          </li>
+        )
+      }
+    </ul>
+
+    <button type="button" class="btn btn--ghost intro__print no-print" data-print>
+      <Icon name="printer" size={17} />
+      {t.intro.print}
+    </button>
+  </div>
+</section>
+
+<style>
+  .intro {
+    display: grid;
+    gap: var(--space-8);
+    padding-block: clamp(3rem, 8vw, 5.5rem) var(--space-12);
+  }
+
+  .intro__photo {
+    width: 7rem;
+    aspect-ratio: 1;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--brand-100);
+  }
+  .intro__photo :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Portraits usually have the face in the upper part of the frame. */
+    object-position: 50% 25%;
+  }
+  .intro__initials {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    font-size: 2.4rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--brand-700);
+  }
+
+  .intro__name {
+    font-size: clamp(2.4rem, 6vw, 3.4rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+  .intro__role {
+    margin-top: var(--space-3);
+    font-size: clamp(1.1rem, 2.2vw, 1.3rem);
+    font-weight: 600;
+    color: var(--brand-600);
+  }
+  .intro__at {
+    font-weight: 400;
+    color: var(--ink-soft);
+  }
+  .intro__role a {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+    text-underline-offset: 0.2em;
+  }
+  .intro__role a:hover {
+    text-decoration-color: currentColor;
+  }
+
+  .intro__facts {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: var(--space-2);
+    font-size: 0.95rem;
+  }
+  .intro__facts li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--ink-soft);
+    overflow-wrap: anywhere;
+  }
+  .intro__facts :global(svg) {
+    flex: none;
+    color: var(--muted);
+  }
+  .intro__print {
+    margin-top: var(--space-6);
+  }
+
+  /* Three columns: the photo shares the width of the section labels below it. */
+  @media (min-width: 52rem) {
+    .intro {
+      /* The contact column fits its longest line, so addresses don't wrap. */
+      grid-template-columns: 10rem 1fr auto;
+      align-items: center;
+    }
+    .intro__photo {
+      width: 100%;
+    }
+    .intro__aside {
+      margin-left: var(--space-4);
+      padding-left: var(--space-6);
+      border-left: 1px solid var(--line);
+    }
+  }
+
+  @media print {
+    .intro {
+      grid-template-columns: 6rem 1fr auto;
+      align-items: center;
+      gap: var(--space-6);
+      padding-block: 0 var(--space-4);
+    }
+    .intro__photo {
+      width: 100%;
+    }
+    .intro__initials {
+      font-size: 1.8rem;
+    }
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('[data-print]').forEach((button) => {
+    button.addEventListener('click', () => window.print());
+  });
+</script>

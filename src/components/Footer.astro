@@ -1,0 +1,37 @@
+---
+import { profile } from '../data/cv';
+
+const site = Astro.site!;
+---
+
+<footer class="site-footer">
+  <div class="container site-footer__inner">
+    <span>© {new Date().getFullYear()} {profile.name}</span>
+    <a href={site.href}>{site.host}</a>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--line);
+    padding-block: var(--space-8);
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+  .site-footer__inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-6);
+    justify-content: space-between;
+  }
+  .site-footer a {
+    color: inherit;
+  }
+
+  @media print {
+    .site-footer {
+      padding-block: var(--space-3) 0;
+      font-size: 0.85rem;
+    }
+  }
+</style>

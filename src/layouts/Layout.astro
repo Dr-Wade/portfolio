@@ -1,0 +1,82 @@
+---
+import '../styles/global.css';
+import { localeUrl, type Dictionary, type Locale } from '../i18n';
+
+interface Props {
+  locale: Locale;
+  t: Dictionary;
+  /** Overrides t.meta.title (e.g. on the 404 page). */
+  title?: string;
+  /** false for pages that shouldn't be indexed or have alternates (404). */
+  indexable?: boolean;
+  /** schema.org data, rendered as JSON-LD. */
+  jsonLd?: Record<string, unknown>;
+}
+
+const { locale, t, title = t.meta.title, indexable = true, jsonLd } = Astro.props;
+
+// hreflang alternates for the homepage
+const alternates: { hreflang: string; href: Locale }[] = [
+  { hreflang: 'en', href: 'en' },
+  { hreflang: 'fr', href: 'fr' },
+  { hreflang: 'x-default', href: 'en' },
+];
+
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+---
+
+<!doctype html>
+<html lang={t.htmlLang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <title>{title}</title>
+    <meta name="description" content={t.meta.description} />
+
+    {
+      indexable ? (
+        <>
+          <link rel="canonical" href={canonical} />
+          {alternates.map((alt) => (
+            <link
+              rel="alternate"
+              hreflang={alt.hreflang}
+              href={new URL(localeUrl(alt.href), Astro.site).href}
+            />
+          ))}
+        </>
+      ) : (
+        <meta name="robots" content="noindex" />
+      )
+    }
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="profile" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={t.meta.description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={locale === 'fr' ? 'fr_FR' : 'en_GB'} />
+    <meta name="twitter:card" content="summary" />
+
+    {jsonLd && <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <meta name="generator" content={Astro.generator} />
+  </head>
+  <body>
+    <a class="skip-link no-print" href="#main">{t.skipLink}</a>
+    <slot name="header" />
+    <main id="main">
+      <slot />
+    </main>
+    <slot name="footer" />
+  </body>
+</html>
